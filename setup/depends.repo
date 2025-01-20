@@ -1,0 +1,13 @@
+repositories:
+  control_msgs:
+    type: git
+    url: https://github.com/ros-controls/control_msgs
+    version: 5.3.0
+  joystick_drivers:
+    type: git
+    url: https://github.com/ros-drivers/joystick_drivers
+    version: 3.3.0
+  teleop_twist_joy:
+    type: git
+    url: https://github.com/ros2/teleop_twist_joy
+    version: 2.5.2
