@@ -190,7 +190,7 @@ class Roboclaw:
     def _writebyte(self, val):
         # self.crc_update(val & 0xFF)
         # 		self._port.write(chr(val&0xFF))
-        print(val)
+        # print(val)
         self._port.write(val.to_bytes(1, "big"))
 
     def _writesbyte(self, val):
@@ -1279,11 +1279,14 @@ class Roboclaw:
             # print(n)
         self._writebyte(ord("e"))
         self._writebyte(ord("n"))
+        self._writebyte(ord("\n"))
+        self._writebyte(ord("\r"))
         return
     
     def AGV_ReadSpeed(self):
         self._writebyte(ord("R"))
         self._writebyte(ord("S"))
+        return "@0000 0000en"
 
         receive = ""
         try_times = 3
@@ -1296,6 +1299,8 @@ class Roboclaw:
             else:
                 try_times -= 1
                 if try_times == 0:
+                    # 测试用，赋值为0
+                    # receive = "@0030 0030en"
                     break
             
         return receive

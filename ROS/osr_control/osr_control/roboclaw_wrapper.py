@@ -224,10 +224,14 @@ class RoboclawWrapper(Node):
             .double_value
         )"""
 
+        self.serial_port_list = ["/dev/ttyCH341USB0"]
         self.encoder_limits = {}
         self.establish_roboclaw_connections()
+        self.log.info("try to stop motors")
         self.stop_motors()  # don't move at start
         # self.setup_encoders()
+
+        # self.log.info("Reading parameters")
 
         # save settings to non-volatile (permanent) memory
         """for address in self.address:
@@ -282,8 +286,7 @@ class RoboclawWrapper(Node):
         self.idle = False
         self.fast_timer = self.create_timer(fast_loop_rate, self.fast_update)
         self.slow_timer = self.create_timer(slow_loop_rate, self.slow_update)
-        self.serial_port_list = []
-        self.log.debug("Initialized Roboclaw wrapper node")
+        self.log.info("Initialized Roboclaw wrapper node")
 
     # 回调函数，待定
     def parameters_callback(self, params):
@@ -300,6 +303,7 @@ class RoboclawWrapper(Node):
 
     def fast_update(self):
         """Read from and write to roboclaws"""
+        # self.log.info("Start fast update")
         # 检查缓冲区中是否有命令，有则发送
         now = self.get_clock().now()
         if self.drive_cmd_buffer:
@@ -322,31 +326,37 @@ class RoboclawWrapper(Node):
         if not self.idle and (now - self.time_last_cmd > self.velocity_timeout):
             # rather than a hard stop, send a ramped velocity command to 0
             if not self.idle_ramp:
-                self.get_logger().debug("Idling: ramping down velocity to zero")
+                self.get_logger().info("Idling: ramping down velocity to zero")
                 self.idle_ramp = True
                 drive_cmd_buffer = CommandDrive()
                 self.send_drive_buffer_velocity(drive_cmd_buffer)
             # if we've already ramped down, send a full stop to minimize
             # idle power consumption
             else:
-                self.get_logger().debug("Idling: full stopping motors")
+                self.get_logger().info("Idling: full stopping motors")
                 self.stop_motors()
                 self.idle = True
 
             # so that's there's a delay between ramping and full stop
             self.time_last_cmd = now
+            # self.log.info("special fast update finished.")
+        
+        
 
     def slow_update(self):
+        # self.log.info("slow update start")
         # Slower roboclaw read/write cycle
         """self.status.battery = self.read_battery()
         self.status.temp = self.read_temperatures()
         self.status.current = self.read_currents()
         self.status.error_status = self.read_errors()"""
-        self.status.battery = 0
-        self.status.temp = 0
-        self.status.current = 0
-        self.status.error_status = 0
+        # 此项目中不需要使用慢更新获取的参数，因此直接按对应类型置零
+        self.status.battery = 0.0  # 浮点数
+        self.status.error_status = ["", "", ""]  # 长度为 3 的字符串数组
+        self.status.temp = [0.0, 0.0, 0.0]  # 长度为 3 的浮点数数组
+        self.status.current = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]  # 长度为 6 的浮点数数组
         self.status_pub.publish(self.status)
+        # self.log.info("slow update finished")
 
     def establish_roboclaw_connections(self):
         """
@@ -365,7 +375,7 @@ class RoboclawWrapper(Node):
                 self.get_parameter("device.back").get_parameter_value().string_value
             )"""
         # serial_port_list = [front_port, middle_port, back_port]
-        self.serial_port_list = ["/dev/ttyCH341USB0"]
+        # self.serial_port_list = ["/dev/ttyCH341USB0"]
 
         for i in range(0, len(self.serial_port_list)):
             # print(f"len(self.serial_port_list) = {len(self.serial_port_list)}    i = {i}")
@@ -478,17 +488,21 @@ class RoboclawWrapper(Node):
         """
         Sends the drive command to the motor controller, closed loop velocity commands
         """
+        self.log.info("try to send drive_buffer_velocity")
+
         left_speed = self.velocity2percent(cmd.left_front_vel)
         right_speed = self.velocity2percent(cmd.right_front_vel * -1) # 右边的轮子控制速度与左轮相反，为负值，很神秘
-        self.AGV_Set_Speed_Meta(1, left_speed, right_speed)
+        self.AGV_Set_Speed_Meta(0, left_speed, right_speed)
 
         left_speed = self.velocity2percent(cmd.left_middle_vel)
         right_speed = self.velocity2percent(cmd.right_middle_vel * -1)
-        self.AGV_Set_Speed_Meta(2, left_speed, right_speed)
+        self.AGV_Set_Speed_Meta(1, left_speed, right_speed)
 
         left_speed = self.velocity2percent(cmd.left_back_vel)
         right_speed = self.velocity2percent(cmd.right_back_vel * -1)
-        self.AGV_Set_Speed_Meta(3, left_speed, right_speed)
+        self.AGV_Set_Speed_Meta(2, left_speed, right_speed)
+
+        self.log.info("send drive_buffer_velocity finished")
 
     #####################################################################################################################
     # 绝对位置刻度与中间位置弧度互换
@@ -560,16 +574,18 @@ class RoboclawWrapper(Node):
         for i in range(3):
             self.AGV_Set_Speed_Meta(i, 0, 0)
 
-    ####################################################################################################
+    #####################################################################################################################
     # 项目新增部分函数
     def AGV_Set_Speed_Meta(self, index, M1_Speed, M2_Speed):
         # 测试用
         if index >= len(self.serial_port_list):
+            self.get_logger().error(f"AGV_Set_Speed_Meta: index = {index} is out of range, max = {len(self.serial_port_list)}")
             return
 
         # 第一位1表示反向，后三位为速度
         # 例"0050 1050"
         msg = "{}{:0>3d} {}{:0>3d}".format(1 if M1_Speed < 0 else 0,abs(M1_Speed), 1 if M2_Speed < 0 else 0, abs(M2_Speed))
+        self.get_logger().info(f"AGV_Set_Speed_Meta: index = {index}, msg = {msg}")
         self.rc[index].AGV_WriteSpeed(msg)
     
     def AGV_Read_Speed(self, index) -> list:
