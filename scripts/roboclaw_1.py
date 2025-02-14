@@ -125,18 +125,16 @@ class Roboclaw:
         """
         return
 
-    # 发送一个字节的数据
     def _sendcommand(self, command=0, address=0):
-        # self.crc_clear()
-        # self.crc_update(address)
+        self.crc_clear()
+        self.crc_update(address)
         # 		self._port.write(chr(address))
-        # self._port.write(address.to_bytes(1, "big"))
-        # self.crc_update(command)
+        self._port.write(address.to_bytes(1, "big"))
+        self.crc_update(command)
         # 		self._port.write(chr(command))
-        self._port.write(command.to_bytes(1, "big"))  # 转为1字节字符串，发送
+        self._port.write(command.to_bytes(1, "big"))
         return
 
-    # 取收到的数据校验位，无用
     def _readchecksumword(self):
         """
                 data = self._port.read(2)
@@ -147,7 +145,6 @@ class Roboclaw:
         """
         return (0, 0)
 
-    # 从这里一直到660行全都是本文件中，类内部调用的函数，发送与接收不同长度的数据
     def _readbyte(self):
         data = self._port.read(1)
         if len(data):
@@ -188,9 +185,8 @@ class Roboclaw:
         return (0, 0)
 
     def _writebyte(self, val):
-        # self.crc_update(val & 0xFF)
+        self.crc_update(val & 0xFF)
         # 		self._port.write(chr(val&0xFF))
-        print(val)
         self._port.write(val.to_bytes(1, "big"))
 
     def _writesbyte(self, val):
@@ -659,7 +655,6 @@ class Roboclaw:
         return False
 
     # User accessible functions
-    # 给用户用的函数
     def SendRandomData(self, cnt):
         for i in range(0, cnt):
             byte = random.getrandbits(8)
@@ -725,12 +720,11 @@ class Roboclaw:
         return self._write0(address, self.Cmd.RESETENC)
 
     def ReadVersion(self, address=0):
-        return 1
         self._port.flushInput()
         self._sendcommand(address, self.Cmd.GETVERSION)
         while 1:
             str = self._port.read()
-            # passed = True
+            #passed = True
             """
             for i in range(0, 48):
                 data = self._port.read(1)
@@ -745,7 +739,7 @@ class Roboclaw:
                     passed = False
                     break
             """
-            # if passed:
+            #if passed:
             print(str)
             if str == "end":
                 return str
@@ -760,7 +754,7 @@ class Roboclaw:
         if trys == 0:
             break
         """
-
+                
         return (0, 0)
 
     def SetEncM1(self, cnt, address=0):
@@ -1230,8 +1224,8 @@ class Roboclaw:
         self._port.flushInput()
         # self._sendcommand(address, self.Cmd.GETVERSION)
         while 1:
-            str = self._readword()
-            # passed = True
+            str = self._readbyte()
+            #passed = True
             """
             for i in range(0, 48):
                 data = self._port.read(1)
@@ -1246,56 +1240,5 @@ class Roboclaw:
                     passed = False
                     break
             """
-            # if passed:
+            #if passed:
             print(str)
-
-    def Test_send(self, text):
-        for char in text:
-            self._writebyte(ord(char))
-            # print(n)
-        return
-    
-    def Test_read(self):
-        receive = ""
-        try_times = 3
-        while 1:
-            data = self._readbyte()
-            if data[0]:
-                receive = receive + chr(data[1])
-                if chr(data[1]) == '$':
-                    break
-            else:
-                try_times -= 1
-                if try_times == 0:
-                    break
-            
-        return receive
-
-
-    def AGV_WriteSpeed(self, text):
-        self._writebyte(ord("@"))
-        for char in text:
-            self._writebyte(ord(char))
-            # print(n)
-        self._writebyte(ord("e"))
-        self._writebyte(ord("n"))
-        return
-    
-    def AGV_ReadSpeed(self):
-        self._writebyte(ord("R"))
-        self._writebyte(ord("S"))
-
-        receive = ""
-        try_times = 3
-        while 1:
-            data = self._readbyte()
-            if data[0]:
-                receive = receive + chr(data[1])
-                if chr(data[1]) == '$':
-                    break
-            else:
-                try_times -= 1
-                if try_times == 0:
-                    break
-            
-        return receive

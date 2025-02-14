@@ -17,10 +17,10 @@ class JoyButtonSubscriber(Node):
         self.last_duty_mode_value = False
         self.last_received_time = None        
         self.cb_group = ReentrantCallbackGroup()
-        self.roboclaw_node_set_param_client = self.create_client(SetParameters, '/roboclaw_wrapper/set_parameters', 
+        """self.roboclaw_node_set_param_client = self.create_client(SetParameters, '/roboclaw_wrapper/set_parameters', 
                                                                  callback_group=self.cb_group)
         while not self.roboclaw_node_set_param_client.wait_for_service(timeout_sec=5.0):
-            self.log.info('Service /roboclaw_wrapper/set_parameters not available, waiting again...', skip_first=True)
+            self.log.info('Service /roboclaw_wrapper/set_parameters not available, waiting again...', skip_first=True)"""
         
         self.subscription = self.create_subscription(
             Joy,
@@ -35,7 +35,7 @@ class JoyButtonSubscriber(Node):
             self.log.error(error_msg)
             raise AttributeError(error_msg)
 
-        button_value = msg.buttons[self.duty_button_index]
+        """button_value = msg.buttons[self.duty_button_index]
         current_time = self.get_clock().now()
         # only flip the mode if we haven't received a button press in over a second
         if button_value and (self.last_received_time is None or (current_time - self.last_received_time).nanoseconds > 1e9):
@@ -44,7 +44,7 @@ class JoyButtonSubscriber(Node):
             self.log.info(f"Turning duty mode {'off' if self.last_duty_mode_value else 'on'}")
             self.last_duty_mode_value = not self.last_duty_mode_value
             await self.set_parameter_value_on_other_node(self.roboclaw_node_set_param_client, param)
-            self.last_received_time = current_time
+            self.last_received_time = current_time"""
 
     async def set_parameter_value_on_other_node(self, node_set_param_client, param):
         request = SetParameters.Request()
