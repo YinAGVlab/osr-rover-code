@@ -461,6 +461,7 @@ class RoboclawWrapper(Node):
         enc_msg.header.stamp = self.get_clock().now().to_msg()
         for i in range(0, len(self.serial_port_list)): # 全部驱动板连接时即循环3次
             speed = self.AGV_Read_Speed(i)
+            # 依次写入参数
             enc_msg.name.append(motor_name_list[i][0])
             # position，似乎没用上，先直接取0
             enc_msg.position.append(0)
@@ -469,7 +470,7 @@ class RoboclawWrapper(Node):
             # current，电流，在此项目中不使用
             enc_msg.effort.append(0)
 
-            enc_msg.name.append(motor_name_list[i][0])
+            enc_msg.name.append(motor_name_list[i][1])
             enc_msg.position.append(0)
             enc_msg.velocity.append(speed[1])
             enc_msg.effort.append(0)
