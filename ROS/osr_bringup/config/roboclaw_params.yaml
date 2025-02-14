@@ -4,7 +4,7 @@ roboclaw_wrapper:
     corner_acceleration_factor: 0.8 # fraction used to scale down the corner motor acceleration (0, 1])
     velocity_timeout: 2.0 # maximum time [s] a particular velocity command will stay active without a new command before stopping
     baud_rate: 115200
-    device:
+    device: # 设为"0"则不会尝试连接
       front: "/dev/ttyCH341USB0"
       middle: "/dev/ttyCH341USB1"
       back: "/dev/ttyCH341USB2"

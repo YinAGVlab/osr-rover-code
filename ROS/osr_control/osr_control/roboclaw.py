@@ -1279,14 +1279,25 @@ class Roboclaw:
             # print(n)
         self._writebyte(ord("e"))
         self._writebyte(ord("n"))
-        self._writebyte(ord("\n"))
         self._writebyte(ord("\r"))
+        self._writebyte(ord("\n"))
+        return
+    
+    def AGV_WritePID(self, PID_text):
+        self._writebyte(ord("P"))
+        for char in PID_text:
+            self._writebyte(ord(char))
+            # print(n)
+        self._writebyte(ord("e"))
+        self._writebyte(ord("n"))
+        self._writebyte(ord("\r"))
+        self._writebyte(ord("\n"))
         return
     
     def AGV_ReadSpeed(self):
         self._writebyte(ord("R"))
         self._writebyte(ord("S"))
-        return "@0000 0000en"
+        # return "200.000000,200.000000,39.000000,-100.000000,-100.000000,-16.000000\r\n" # 测试用
 
         receive = ""
         try_times = 3

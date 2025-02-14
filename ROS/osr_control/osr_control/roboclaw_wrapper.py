@@ -40,7 +40,10 @@ class RoboclawWrapper(Node):
             namespace="",
             parameters=[
                 ("baud_rate", Parameter.Type.INTEGER),
-                ("device", Parameter.Type.STRING),
+                # 三个驱动板的串口号
+                ("device.front", Parameter.Type.STRING),
+                ("device.middle", Parameter.Type.STRING),
+                ("device.back", Parameter.Type.STRING),
                 ("addresses", Parameter.Type.INTEGER_ARRAY),
                 # ('roboclaw_mapping', Parameter.Type.INTEGER_ARRAY),
                 ("drive_acceleration_factor", Parameter.Type.DOUBLE),
@@ -224,7 +227,19 @@ class RoboclawWrapper(Node):
             .double_value
         )"""
 
-        self.serial_port_list = ["/dev/ttyCH341USB0"]
+        # 读驱动板串口号
+        self.serial_port_list = []
+        front_serial_port = self.get_parameter("device.front").get_parameter_value().string_value
+        if front_serial_port != "0": # 测试时设为0则不会进行连接
+            self.serial_port_list.append(front_serial_port)
+        middle_serial_port = self.get_parameter("device.middle").get_parameter_value().string_value
+        if middle_serial_port != "0":
+            self.serial_port_list.append(middle_serial_port)
+        back_port_list = self.get_parameter("device.back").get_parameter_value().string_value
+        if back_port_list != "0":
+            self.serial_port_list.append(back_port_list)
+        self.log.info(f"read serial_port_list = {self.serial_port_list}")
+
         self.encoder_limits = {}
         self.establish_roboclaw_connections()
         self.log.info("try to stop motors")
@@ -444,7 +459,7 @@ class RoboclawWrapper(Node):
 
         enc_msg = JointState()
         enc_msg.header.stamp = self.get_clock().now().to_msg()
-        for i in range(0, len(self.serial_port_list)):
+        for i in range(0, len(self.serial_port_list)): # 全部驱动板连接时即循环3次
             speed = self.AGV_Read_Speed(i)
             enc_msg.name.append(motor_name_list[i][0])
             # position，似乎没用上，先直接取0
@@ -488,7 +503,7 @@ class RoboclawWrapper(Node):
         """
         Sends the drive command to the motor controller, closed loop velocity commands
         """
-        self.log.info("try to send drive_buffer_velocity")
+        # self.log.info("try to send drive_buffer_velocity")
 
         left_speed = self.velocity2percent(cmd.left_front_vel)
         right_speed = self.velocity2percent(cmd.right_front_vel * -1) # 右边的轮子控制速度与左轮相反，为负值，很神秘
@@ -502,7 +517,7 @@ class RoboclawWrapper(Node):
         right_speed = self.velocity2percent(cmd.right_back_vel * -1)
         self.AGV_Set_Speed_Meta(2, left_speed, right_speed)
 
-        self.log.info("send drive_buffer_velocity finished")
+        # self.log.info("send drive_buffer_velocity finished")
 
     #####################################################################################################################
     # 绝对位置刻度与中间位置弧度互换
@@ -589,18 +604,37 @@ class RoboclawWrapper(Node):
         self.rc[index].AGV_WriteSpeed(msg)
     
     def AGV_Read_Speed(self, index) -> list:
-        speed_msg = self.rc[index].AGV_ReadSpeed()
-        left_foward = int(speed_msg[1:2])
-        left_speed = int(speed_msg[2:5])
-        if left_foward == 1:
-            left_speed *= -1
+        # self.get_logger().info(f"Read Speed.")
 
-        right_foward = int(speed_msg[6:7])
-        right_speed = int(speed_msg[7:10])
-        if right_foward == 1:
-            right_speed *= -1
+        speed_msg = self.rc[index].AGV_ReadSpeed() # 读速度信息串
+        # PID_R.target_val, Speed2, PID_R.output_val, PID_L.target_val, Speed1, PID_L.output_val
+        # 200.000000,200.000000,39.000000,-100.000000,-100.000000,-15.000000\r\n
+        speed_msg = speed_msg.strip() # 去掉末尾的\r\n
+        speed_msg_list = speed_msg.split(',')
+        speed_msg_list = [float(num) for num in speed_msg_list]
+        # [200.0, 200.0, 39.0, -100.0, -100.0, -15.0]
+
+        right_speed = speed_msg_list[1]
+        left_speed = speed_msg_list[2]
 
         return [left_speed, right_speed]
+    
+    def AGV_Set_PID_Para(self, index: int, Pl: float, Il: float, Dl: float, Pr: float, Ir: float, Dr: float):
+        # 测试用
+        if index >= len(self.serial_port_list):
+            self.get_logger().error(f"AGV_Set_PID_Para: index = {index} is out of range, max = {len(self.serial_port_list)}")
+            return
+
+        # 构造PID消息字符串
+        msg = "{}{:0>4d} {}{:0>4d} {}{:0>4d} {}{:0>4d} {}{:0>4d} {}{:0>4d}".format(
+            1 if Pl < 0 else 0, abs(int(Pl * 10)),
+            1 if Il < 0 else 0, abs(int(Il * 10)),
+            1 if Dl < 0 else 0, abs(int(Dl * 10)),
+            1 if Pr < 0 else 0, abs(int(Pr * 10)),
+            1 if Ir < 0 else 0, abs(int(Ir * 10)),
+            1 if Dr < 0 else 0, abs(int(Dr * 10)))
+        self.get_logger().info(f"Set PID: index = {index}, left PID = {Pl}, {Il}, {Dl}, right PID = {Pr}, {Ir}, {Dr}")
+        self.rc[index].AGV_WritePID(msg)
 
 
 def main(args=None):
