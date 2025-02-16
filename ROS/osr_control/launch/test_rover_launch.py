@@ -23,6 +23,7 @@ def generate_launch_description():
 
     ld = LaunchDescription()
 
+    # 驱动板节点
     ld.add_action(
         Node(
             package='osr_control',
@@ -32,6 +33,23 @@ def generate_launch_description():
             emulate_tty=True,
             respawn=True,
             parameters=[roboclaw_params]
+        )
+    )
+
+    ld.add_action(
+        DeclareLaunchArgument('enable_odometry', default_value='false')
+    )
+
+    # 舵机节点
+    ld.add_action(
+        Node(
+            package='osr_control',
+            executable='servo_control',
+            name='servo_wrapper',
+            output='screen',
+            emulate_tty=True,
+            respawn=True,
+            parameters=[{'centered_pulse_widths': [138, 120, 141, 120]}]  # pulse width where the corner motors are in their default position, see rover_bringup.md.
         )
     )
     ld.add_action(
