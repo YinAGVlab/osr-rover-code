@@ -404,6 +404,10 @@ class RoboclawWrapper(Node):
                 msg = f"Unable to connect to serial port {serial_port}."
                 self.log.fatal(msg)
                 raise Exception(msg)
+            else:
+                self.get_logger().info(
+                    f"Connected to serial port {serial_port} at {baud_rate} baud_rate."
+                )
 
             self.address = (
                 self.get_parameter("addresses")
@@ -608,6 +612,7 @@ class RoboclawWrapper(Node):
         # self.get_logger().info(f"Read Speed.")
 
         speed_msg = self.rc[index].AGV_ReadSpeed() # 读速度信息串
+        self.get_logger().info(f"AGV_Read_Speed_Meta: index = {index}, msg = {speed_msg}")
         # PID_R.target_val, Speed2, PID_R.output_val, PID_L.target_val, Speed1, PID_L.output_val
         # 200.000000,200.000000,39.000000,-100.000000,-100.000000,-15.000000\r\n
         speed_msg = speed_msg.strip() # 去掉末尾的\r\n
