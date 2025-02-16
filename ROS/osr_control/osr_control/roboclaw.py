@@ -1305,7 +1305,7 @@ class Roboclaw:
             data = self._readbyte()
             if data[0]:
                 receive = receive + chr(data[1])
-                if chr(data[1]) == '$':
+                if chr(data[1]) == '\n':
                     break
             else:
                 try_times -= 1
