@@ -1302,10 +1302,11 @@ class Roboclaw:
         receive = ""
         try_times = 3
         while 1:
+            print("try_times: ", try_times)
             data = self._readbyte()
             if data[0]:
                 receive = receive + chr(data[1])
-                if chr(data[1]) == '\n':
+                if chr(data[1]) == '\n': # 暂定的结束符
                     break
             else:
                 try_times -= 1

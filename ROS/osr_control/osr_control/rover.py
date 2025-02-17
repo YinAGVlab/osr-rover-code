@@ -76,6 +76,8 @@ class Rover(Node):
         self.corner_cmd_pub = self.create_publisher(CommandCorner, "/cmd_corner", 1)
         self.drive_cmd_pub = self.create_publisher(CommandDrive, "/cmd_drive", 1)
 
+        self.get_logger().debug("Initialized Rover node")
+
     def cmd_cb(self, twist_msg, intuitive=False):
         """
         Respond to an incoming Twist command in one of two ways depending on the mode (intuitive)
