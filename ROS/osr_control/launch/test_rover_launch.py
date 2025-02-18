@@ -1,6 +1,5 @@
 import os
 
-from launch import substitutions
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
@@ -52,10 +51,8 @@ def generate_launch_description():
             parameters=[{'centered_pulse_widths': [55, 116, 141, 114]}]  # pulse width where the corner motors are in their default position, see rover_bringup.md.
         )
     )
-    ld.add_action(
-        DeclareLaunchArgument('enable_odometry', default_value='false')
-    )
     
+    # 整体控制
     ld.add_action(
         Node(
             package='osr_control',
@@ -65,26 +62,9 @@ def generate_launch_description():
             emulate_tty=True,
             respawn=True,
             parameters=[osr_params,
-                        {'enable_odometry': True}]
+                        {'enable_odometry': LaunchConfiguration('enable_odometry')}]
         )
     )
-
-    ld.add_action(
-        Node(
-            package='joy',
-            executable='joy_node',
-            name='joy',
-            output='screen',
-            emulate_tty=True,
-            respawn=True,
-            parameters=[
-                {"autorepeat_rate": 5.0},
-                {"device_id": 0},  # This might be different on your computer. Run `ls -l /dev/input/event*`. If you have event1, put 1.
-            ]        
-        )
-    )
-
-    ld.add_action(DeclareLaunchArgument('joy_vel', default_value='cmd_vel'))
 
     ld.add_action(
         Node(
@@ -111,9 +91,28 @@ def generate_launch_description():
                 {"enable_turbo_button": -1},  # -1 to disable turbo
             ],
             remappings=[
-                ('/cmd_vel', substitutions.LaunchConfiguration('joy_vel'))
+                ('/cmd_vel', LaunchConfiguration('joy_vel'))
             ]
         )
     )
+
+    ld.add_action(
+        Node(
+            package='joy',
+            executable='joy_node',
+            name='joy',
+            output='screen',
+            emulate_tty=True,
+            respawn=True,
+            parameters=[
+                {"autorepeat_rate": 5.0},
+                {"device_id": 0},  # This might be different on your computer. Run `ls -l /dev/input/event*`. If you have event1, put 1.
+            ]        
+        )
+    )
+
+    ld.add_action(DeclareLaunchArgument('joy_vel', default_value='cmd_vel'))
+
+    
     
     return ld
