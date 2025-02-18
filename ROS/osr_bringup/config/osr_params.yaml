@@ -1,9 +1,9 @@
 rover:
   ros__parameters:
-    rover_dimensions:
-      d1: 0.177  # [m]
-      d2: 0.310  # [m]
-      d3: 0.274  # [m]
-      d4: 0.253  # [m]
+    rover_dimensions: # 对应图片 ROS/osr_control/dimensions_wheels_illustration.png
+      d1: 0.310  # [m]
+      d2: 0.300  # [m]
+      d3: 0.310  # [m]
+      d4: 0.360 # [m]
       wheel_radius: 0.075  # [m], needs to be a float
-    drive_no_load_rpm: 223.0  # no load speed for the drive motors. NOTE: needs to be a float value
+    drive_no_load_rpm: 484.0  # no load speed for the drive motors. NOTE: needs to be a float value
