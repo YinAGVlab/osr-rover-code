@@ -49,7 +49,7 @@ def generate_launch_description():
             output='screen',
             emulate_tty=True,
             respawn=True,
-            parameters=[{'centered_pulse_widths': [55, 116, 141, 114]}]  # pulse width where the corner motors are in their default position, see rover_bringup.md.
+            parameters=[{'centered_pulse_widths': [165, 223, 153, 222]}]  # pulse width where the corner motors are in their default position, see rover_bringup.md.
         )
     )
     
@@ -78,13 +78,13 @@ def generate_launch_description():
             respawn=True,
             parameters=[
                 {"axis_linear.x": 1},  # 前进后退摇杆
-                {"scale_linear.x": 0.6},  # 行进速度
+                {"scale_linear.x": 1.0},  # 行进速度  0.6
                 # {"scale_linear_turbo.x": 1.78},  # 速度单位，Xm/s?
-                {"axis_angular.yaw": 0},  # 转向摇杆
+                {"axis_angular.yaw": 3},  # 转向摇杆
                 {"scale_angular.yaw": -1.25},  # scale to apply to angular speed, in rad/s: scale_linear / min_radius(=0.45m)
                 # {"scale_angular_turbo.yaw": 3.95},  # scale to apply to angular speed, in rad/s: scale_linear_turbo / min_radius
 
-                {"axis_angular.pitch": 3},  # 原地转向摇杆
+                {"axis_angular.pitch": 6},  # 原地转向摇杆
                 {"scale_angular.pitch": 0.5},  # scale to apply to angular speed, in rad/s: scale_linear / min_radius(=0.45m)
 
                 # {"enable_button": 4},  # which button to press to enable movement
