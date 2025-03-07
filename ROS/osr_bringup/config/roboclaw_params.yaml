@@ -1,19 +1,19 @@
 roboclaw_wrapper:
   ros__parameters:
-    drive_acceleration_factor: 0.8 # fraction used to scale down the drive motor acceleration (0, 1]
-    corner_acceleration_factor: 0.8 # fraction used to scale down the corner motor acceleration (0, 1])
+    drive_acceleration_factor: 0.8 # fraction used to scale down the drive motor acceleration (0, 1] # 貌似没用上
+    corner_acceleration_factor: 0.8 # fraction used to scale down the corner motor acceleration (0, 1]) # 没用上
     velocity_timeout: 2.0 # maximum time [s] a particular velocity command will stay active without a new command before stopping
     baud_rate: 9600
-    device: # 设为"0"则不会尝试连接
-      front: "/dev/ttyCH341USB0"
-      middle: "/dev/ttyCH341USB1"
-      back: "/dev/ttyCH341USB2"
-    addresses: [128, 129, 130]
-    duty_mode: true # send duty commands to the roboclaw instead of velocity commands. This can mean a smoother drive but shouldn't be used for autonomous navigation as velocity commands aren't interpreted correclty
-    velocity_qpps_to_duty_factor: 8 # hand-tuned factor to convert velocity commands to duty commands, must be integer
+    device: # 驱动板串口号，设为"0"则不会尝试连接
+      front: "/dev/ttyCH343USB0"
+      middle: "/dev/ttyCH343USB1"
+      back: "/dev/ttyCH343USB3"
+    addresses: [128, 129, 130] # 没用上
+    duty_mode: true # send duty commands to the roboclaw instead of velocity commands. This can mean a smoother drive but shouldn't be used for autonomous navigation as velocity commands aren't interpreted correclty # 作用未知
+    velocity_qpps_to_duty_factor: 8 # hand-tuned factor to convert velocity commands to duty commands, must be integer # 没用上
     #gear_ratio from the goBilda website for the specific motor you are using
     #ticks_per_rev needs to be the value pre-gearing, not on the output shaft. However, goBilda lists pulses per revolution (PPR) on output shaft, so to get the correct ticks_per_rev we use this formula: PPR(output shaft) / gear_ratio -> 751.8/26.9 ~= 28 The 751.8 is the listed PPR for these motors on the goBilda site.
-    roboclaw_mapping:
+    roboclaw_mapping: # 电机参数，都没用上
       drive_left_front:
         address: 128
         channel: M1

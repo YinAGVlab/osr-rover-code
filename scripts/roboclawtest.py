@@ -20,8 +20,8 @@ from roboclaw_1 import Roboclaw
 
 if __name__ == "__main__":
 
-    roboclaw0 = Roboclaw("/dev/ttyCH341USB1", 9600)
-    roboclaw1 = Roboclaw("/dev/serial1", 115200)
+    roboclaw0 = Roboclaw("/dev/ttyCH343USB3", 9600)
+    roboclaw1 = Roboclaw("/dev/serial1", 9600)
     connected0 = roboclaw0.Open() == 1
     connected1 = False
     if connected0:
@@ -30,8 +30,8 @@ if __name__ == "__main__":
         speed_msg = roboclaw0.AGV_ReadSpeed() # 读速度信息串
         print(f"AGV_Read_Speed_Meta: msg = {speed_msg}")
 
-        M1_Speed = 50
-        M2_Speed = 50
+        M1_Speed = 0
+        M2_Speed = 0
         msg = "{}{:0>3d} {}{:0>3d}".format(1 if M1_Speed < 0 else 0,abs(M1_Speed), 1 if M2_Speed < 0 else 0, abs(M2_Speed))
         print(f"AGV_Set_Speed_Meta: msg = {msg}")
         roboclaw0.AGV_WriteSpeed(msg)
