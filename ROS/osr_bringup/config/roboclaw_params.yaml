@@ -5,9 +5,9 @@ roboclaw_wrapper:
     velocity_timeout: 2.0 # maximum time [s] a particular velocity command will stay active without a new command before stopping
     baud_rate: 9600
     device: # 驱动板串口号，设为"0"则不会尝试连接
-      front: "/dev/ttyCH341USB0"
-      middle: "/dev/ttyCH341USB1"
-      back: "/dev/ttyCH341USB2"
+      front: "/dev/ttyCH343USB0"
+      middle: "/dev/ttyCH343USB1"
+      back: "/dev/ttyCH343USB3"
     addresses: [128, 129, 130] # 没用上
     duty_mode: true # send duty commands to the roboclaw instead of velocity commands. This can mean a smoother drive but shouldn't be used for autonomous navigation as velocity commands aren't interpreted correclty # 作用未知
     velocity_qpps_to_duty_factor: 8 # hand-tuned factor to convert velocity commands to duty commands, must be integer # 没用上
