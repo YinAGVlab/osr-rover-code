@@ -12,9 +12,7 @@ from sensor_msgs.msg import JointState
 from osr_interfaces.msg import CommandDrive, Status
 
 ############################################################################################
-serial1 = ""
-serial2 = ""
-serial3 = ""
+max_speed = 200
 
 STOP_MSG = "@0000 0000en"
 ############################################################################################
@@ -512,15 +510,15 @@ class RoboclawWrapper(Node):
 
         left_speed = self.velocity2percent(cmd.left_front_vel)
         right_speed = self.velocity2percent(cmd.right_front_vel * -1) # 右边的轮子控制速度与左轮相反，为负值，很神秘
-        self.AGV_Set_Speed_Meta(0, left_speed, right_speed)
+        self.AGV_Set_Speed_Meta(0, right_speed, left_speed) # 不知道为啥，但是要反过来
 
         left_speed = self.velocity2percent(cmd.left_middle_vel)
         right_speed = self.velocity2percent(cmd.right_middle_vel * -1)
-        self.AGV_Set_Speed_Meta(1, left_speed, right_speed)
+        self.AGV_Set_Speed_Meta(1, right_speed, left_speed)
 
         left_speed = self.velocity2percent(cmd.left_back_vel)
         right_speed = self.velocity2percent(cmd.right_back_vel * -1)
-        self.AGV_Set_Speed_Meta(2, left_speed, right_speed)
+        self.AGV_Set_Speed_Meta(2, right_speed, left_speed)
 
         # self.log.info("send drive_buffer_velocity finished")
 
@@ -601,6 +599,10 @@ class RoboclawWrapper(Node):
         if index >= len(self.serial_port_list):
             self.get_logger().error(f"AGV_Set_Speed_Meta: index = {index} is out of range, max = {len(self.serial_port_list)}")
             return
+            
+        # set max speed
+        M1_Speed = int(M1_Speed / 100 * max_speed)
+        M2_Speed = int(M2_Speed / 100 * max_speed)
 
         # 第一位1表示反向，后三位为速度
         # 例"0050 1050"

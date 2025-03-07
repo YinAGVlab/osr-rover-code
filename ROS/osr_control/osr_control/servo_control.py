@@ -86,7 +86,8 @@ class ServoWrapper(Node):
             self.log.error("ServoKit not instantiated yet, dropping cmd", throttle_duration_sec=5)
             return
 
-        for ind, corner_name in zip(range(4), self.corner_motors):
+        for i, corner_name in zip(range(4), self.corner_motors):
+            ind = 3 - i # 根据实际情况修改
             # store goal so we can estimate current angle
             angle = getattr(cmd, corner_name[7:]+"_pos") * RAD_TO_DEG
             # TODO make readable, cleaner
